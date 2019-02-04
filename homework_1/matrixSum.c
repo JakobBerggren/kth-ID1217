@@ -23,11 +23,13 @@
 
 pthread_mutex_t barrier;  /* mutex lock for the barrier */
 pthread_mutex_t max, min, sum;  /* mutex lock for the max, min, sum */
+pthread_mutex_t task;
 pthread_cond_t go;        /* condition variable for leaving */
 int numWorkers;           /* number of workers */ 
 int numArrived = 0;       /* number who have arrived */
 struct valuepos global_max, global_min; /* global max/min */
 int global_sum;
+int counter;
 
 double start_time, end_time; /* start and end times */
 int size, stripSize;  /* assume size is multiple of numWorkers */
@@ -95,6 +97,7 @@ int main(int argc, char *argv[]) {
   pthread_mutex_init(&max, NULL);
   pthread_mutex_init(&min, NULL);
   pthread_mutex_init(&sum, NULL);
+  pthread_mutex_init(&task, NULL);
   pthread_cond_init(&go, NULL);
 
   /* read command line args if any */
@@ -161,6 +164,15 @@ void update_sum(int new){
   pthread_mutex_unlock(&sum);
 }
 
+int getTask(){
+  if(counter < size){
+    //counter ++;
+    return counter++;
+  }
+
+  return -1;
+}
+
 /* Each worker sums the values in one strip of the matrix.
    After a barrier, worker(0) computes and prints the total */
 void *Worker(void *arg) {
@@ -187,6 +199,33 @@ void *Worker(void *arg) {
   min.y = 0;
   min.x = 0;
   min.value = matrix[0][0];
+
+  while(true){
+
+    pthread_mutex_lock(&task);
+    int taskval = getTask();
+    pthread_mutex_unlock(&task);
+    if(taskval == -1)
+      break;
+
+    for(int i=0;i<size;i++){
+      total += matrix[taskval][i];
+
+      if(matrix[taskval][i] > max.value){
+        max.value = matrix[taskval][i];
+        max.y = taskval;
+        max.x = i;
+      }
+        
+      if(matrix[taskval][i] < min.value){
+        min.value = matrix[taskval][i];
+        min.y = taskval;
+        min.x = i;
+      } 
+    }
+  }
+
+  /* Used for 1st / 2nd
   for (i = first; i <= last; i++){
     for (j = 0; j < size; j++){
       total += matrix[i][j];
@@ -204,8 +243,9 @@ void *Worker(void *arg) {
         
     }
   }
+  */
 
-  /* part 2 */
+  /* part 2 and 3 */
   if(max.value > global_max.value)
     update_max(max);
   if(min.value < global_min.value)
