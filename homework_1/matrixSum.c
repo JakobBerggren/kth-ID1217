@@ -22,9 +22,22 @@
 #define MAXWORKERS 10   /* maximum number of workers */
 
 pthread_mutex_t barrier;  /* mutex lock for the barrier */
+pthread_mutex_t max, min, sum;  /* mutex lock for the max, min, sum */
 pthread_cond_t go;        /* condition variable for leaving */
 int numWorkers;           /* number of workers */ 
 int numArrived = 0;       /* number who have arrived */
+struct valuepos global_max, global_min; /* global max/min */
+int global_sum;
+
+double start_time, end_time; /* start and end times */
+int size, stripSize;  /* assume size is multiple of numWorkers */
+int sums[MAXWORKERS]; /* partial sums */
+int matrix[MAXSIZE][MAXSIZE]; /* matrix */
+
+//struct valuepos maximum[MAXWORKERS]; /* maximum value */
+//struct valuepos minimum[MAXWORKERS]; /* minimum value */
+
+void *Worker(void *);
 
 /* a reusable counter barrier */
 void Barrier() {
@@ -37,11 +50,6 @@ void Barrier() {
     pthread_cond_wait(&go, &barrier);
   pthread_mutex_unlock(&barrier);
 }
-
-/* struct to hold max/min value with position in matrix */
-struct valuepos{
-  int x, y, value;
-};
 
 /* timer */
 double read_timer() {
@@ -57,15 +65,19 @@ double read_timer() {
     return (end.tv_sec - start.tv_sec) + 1.0e-6 * (end.tv_usec - start.tv_usec);
 }
 
-double start_time, end_time; /* start and end times */
-int size, stripSize;  /* assume size is multiple of numWorkers */
-int sums[MAXWORKERS]; /* partial sums */
-int matrix[MAXSIZE][MAXSIZE]; /* matrix */
+/* struct to hold max/min value with position in matrix */
+struct valuepos{
+  int x, y, value;
+};
 
-struct valuepos maximum[MAXWORKERS]; /* maximum value */
-struct valuepos minimum[MAXWORKERS]; /* minimum value */
+void printSum(){
+  end_time = read_timer();
 
-void *Worker(void *);
+    printf("The total is %d\n", global_sum);
+    printf("The maximum is %d located at [%d,%d]\n", global_max.value, global_max.y, global_max.x);
+    printf("The minimum is %d located at [%d,%d]\n", global_min.value, global_min.y, global_min.x);
+    printf("The execution time is %g sec\n", end_time - start_time);
+}
 
 /* read command line, initialize, and create threads */
 int main(int argc, char *argv[]) {
@@ -80,6 +92,9 @@ int main(int argc, char *argv[]) {
 
   /* initialize mutex and condition variable */
   pthread_mutex_init(&barrier, NULL);
+  pthread_mutex_init(&max, NULL);
+  pthread_mutex_init(&min, NULL);
+  pthread_mutex_init(&sum, NULL);
   pthread_cond_init(&go, NULL);
 
   /* read command line args if any */
@@ -95,6 +110,13 @@ int main(int argc, char *argv[]) {
           matrix[i][j] = rand()%99;
 	  }
   }
+  global_max.y = 0;
+  global_max.x = 0;
+  global_max.value = matrix[0][0];
+
+  global_min.y = 0;
+  global_min.x = 0;
+  global_min.value = matrix[0][0];
 
   /* print the matrix */
 //#ifdef DEBUG
@@ -111,7 +133,32 @@ int main(int argc, char *argv[]) {
   start_time = read_timer();
   for (l = 0; l < numWorkers; l++)
     pthread_create(&workerid[l], &attr, Worker, (void *) l);
+  
+  /* Make sure every thread is done */
+  for(l = 0; l < numWorkers; l++)
+    pthread_join(workerid[l], NULL);
+
+  printSum();
+
   pthread_exit(NULL);
+}
+
+void update_max(struct valuepos new){
+  pthread_mutex_lock(&max);
+  if(new.value > global_max.value)
+    global_max = new;
+  pthread_mutex_unlock(&max);
+}
+void update_min(struct valuepos new){
+  pthread_mutex_lock(&min);
+  if(new.value < global_min.value)
+    global_min = new;
+  pthread_mutex_unlock(&min);
+}
+void update_sum(int new){
+  pthread_mutex_lock(&sum);
+    global_sum += new;
+  pthread_mutex_unlock(&sum);
 }
 
 /* Each worker sums the values in one strip of the matrix.
@@ -158,6 +205,15 @@ void *Worker(void *arg) {
     }
   }
 
+  /* part 2 */
+  if(max.value > global_max.value)
+    update_max(max);
+  if(min.value < global_min.value)
+    update_min(min);
+  
+  update_sum(total);
+
+  /* Sum using barrier and arrays
   sums[myid] = total;
   maximum[myid] = max;
   minimum[myid] = min;
@@ -173,12 +229,14 @@ void *Worker(void *arg) {
       if(minimum[i].value < min.value)
         min = minimum[i];
     }
+    */
     /* get end time */
-    end_time = read_timer();
+    //end_time = read_timer();
     /* print results */
+    /*
     printf("The total is %d\n", total);
     printf("The maximum is %d located at [%d,%d]\n", max.value, max.y, max.x);
     printf("The minimum is %d located at [%d,%d]\n", min.value, min.y, min.x);
     printf("The execution time is %g sec\n", end_time - start_time);
-  }
+    */
 }
