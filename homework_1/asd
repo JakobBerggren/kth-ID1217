@@ -1,0 +1,39 @@
+void *quicksort(void *arg){
+    int i, pivot, start, end;
+    i = (int) arg;
+    start = 0;
+    end = size;
+
+    if(start < end){
+        pivot = (start+end)/2;
+        pivot = partititon(start, end, pivot);
+
+        if(i == MAXWORKERS-1){
+            sort(start, pivot);
+        }
+        else if(i < MAXWORKERS){
+            i++;
+            pthread_create(&threads[i], NULL,*qsort, (void *)i);
+            pthread_join(threads[i], NULL);
+        }
+    
+        if(i == MAXWORKERS -1){
+            sort(pivot, end);
+        }
+        else if(i < MAXWORKERS){
+            i++;
+            pthread_create(&threads[i], NULL,*qsort, (void *)i);
+            pthread_join(threads[i], NULL);
+        }
+    }
+}
+
+void *sort(int left, int right){
+    int pivot;
+    if(left >= right){
+        return;
+    }
+    else{
+        pivot = (left+right)
+    }
+}
