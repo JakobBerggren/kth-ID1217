@@ -29,7 +29,7 @@ gcc -O -fopenmp -o matrixSum-openmp matrixSum-openmp.c
 5000 - 24.189ms     - 35% speedup  
 10000 - 69.5116ms   . 87% speedup  
 
-##discussion of result
+## Discussion of result
 
 At smaller matrices it may not be worth it to use extra threads due to overhead cost. Larger matrices allows for greater use of processes.
 Disturbance when running may be the reason for discrepancies.
@@ -39,7 +39,7 @@ Disturbance when running may be the reason for discrepancies.
 
 # quicksort.c
 
-##How to run: 
+## How to run: 
 usage with gcc (version 4.2 or higher required):
 gcc -O -fopenmp -o quicksort-openmp quicksort-openmp.c 
 ./quicksort-openmp size numWorkers
@@ -67,6 +67,6 @@ gcc -O -fopenmp -o quicksort-openmp quicksort-openmp.c
 10000 - 99.4739ms  
 100000 - 246.196ms  
 
-### explanation
+### Discussion of result
 
 It is clear that no speedup is achieved with this implementation. I believe the reason for that is the lack of a threshold for when the number of elements is so small that it is unneccessary to do the sorting in parallel.
