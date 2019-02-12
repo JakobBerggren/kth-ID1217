@@ -1,8 +1,8 @@
 # matrixSum.c
 
 ## How to run:
-usage with gcc (version 4.2 or higher required):
-gcc -O -fopenmp -o matrixSum-openmp matrixSum-openmp.c 
+usage with gcc (version 4.2 or higher required):  
+gcc -O -fopenmp -o matrixSum-openmp matrixSum-openmp.c   
 ./matrixSum-openmp size numWorkers
 
 
@@ -40,8 +40,8 @@ Disturbance when running may be the reason for discrepancies.
 # quicksort.c
 
 ## How to run: 
-usage with gcc (version 4.2 or higher required):
-gcc -O -fopenmp -o quicksort-openmp quicksort-openmp.c 
+usage with gcc (version 4.2 or higher required):  
+gcc -O -fopenmp -o quicksort-openmp quicksort-openmp.c   
 ./quicksort-openmp size numWorkers
 
 ## Performance
