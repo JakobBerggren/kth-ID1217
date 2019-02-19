@@ -3,7 +3,7 @@
     Multiple producers - one consumer
 
     usage under Linux:         
-        gcc bearHoneybees.c -lpthread -lposix4
+        gcc bearHoneybees.c -lpthread
         ./a.out nHoneybees nPortions
 
 */
