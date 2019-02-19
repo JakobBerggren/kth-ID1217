@@ -3,7 +3,7 @@
     Multiple producers - one consumer
 
     usage under Linux:         
-        gcc hungryBird.c -lpthread -lposix4
+        gcc bearHoneybees.c -lpthread -lposix4
         ./a.out nHoneybees nPortions
 
 */
@@ -11,11 +11,13 @@
 #include <pthread.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <semaphore.h>
 
 #define SHARED 1
 #define MAXHONEYBEES 16
 #define MAXPORTIONS 10000
+#define TRUE 1
 
 void *Producer(void*);
 void *Consumer(void*);
@@ -27,7 +29,7 @@ int nHoneybees;
 int nPortions;
 
 int main(int argc, char *argv[]) {
-    int i;
+    long i;
 
     pthread_t honeybees[MAXHONEYBEES];
     pthread_t bear;
@@ -41,7 +43,7 @@ int main(int argc, char *argv[]) {
     if (nPortions > MAXPORTIONS) nPortions = MAXPORTIONS;
 
     sem_init(&full, SHARED, 0);    //init as full
-    sem_init(&mutex, SHARED, 0);
+    sem_init(&mutex, SHARED, 1);
 
     pthread_create(&bear, &attr, Consumer, NULL);
 
@@ -60,10 +62,10 @@ int main(int argc, char *argv[]) {
 void *Producer(void *arg){
     printf("Honeybee created\n");
 
-    while(true){
+    while(TRUE){
         sem_wait(&mutex);
         pot++;
-        printf("The pot has %d portions\n", pot);
+        printf("The pot has been filled by bee nr.%lu %d portions\n",pthread_self() , pot);
         if(pot == nPortions){
             printf("The pot has %d portions, and is now full\n", pot);
             sem_post(&full);
@@ -79,7 +81,7 @@ void *Producer(void *arg){
 void *Consumer(void *arg){
     printf("Bear created\n");
 
-    while(true){
+    while(TRUE){
         sem_wait(&full);
         printf("The bear has awaken and eats all the honey..\n");
         pot = 0;      

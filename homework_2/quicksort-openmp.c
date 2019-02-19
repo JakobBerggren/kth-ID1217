@@ -47,7 +47,14 @@ int main(int argc, char *argv[]){
     }
 
     start_time = omp_get_wtime();
+    #pragma omp parallel
+    {
+    #pragma omp single
     quicksort(&data);
+    }
+    
+
+
     end_time = omp_get_wtime();
 
     printf("Sorting %d elements with %d threads took %gs\n",size, threads, end_time-start_time);
@@ -77,12 +84,12 @@ void* quicksort(void *data){
         info2.start = pivot+1;
         info2.end = right;
         
-        #pragma omp parallel sections
+        //#pragma omp parallel sections
         {
-            #pragma omp section
+            #pragma omp task
             quicksort(&info1);
 
-            #pragma omp section
+            #pragma omp task
             quicksort(&info2);
         }
     }

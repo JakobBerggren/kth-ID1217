@@ -2,8 +2,8 @@
 
     One producer - multiple consumers
 
-    usage under Linux:          //TODO UPDATE RUNNING INFO
-        gcc hungryBird.c -lpthread -lposix4
+    usage under Linux:
+        gcc hungryBird.c -lpthread 
         ./a.out nBirds nWorms
 
 */
@@ -11,11 +11,13 @@
 #include <pthread.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <unistd.h>
 #include <semaphore.h>
 
 #define SHARED 1
 #define MAXBIRDS 16
 #define MAXWORMS 10000
+#define TRUE 1
 
 void *Producer(void*);
 void *Consumer(void*);
@@ -41,7 +43,7 @@ int main(int argc, char *argv[]) {
     if (nWorms > MAXWORMS) nWorms = MAXWORMS;
 
     sem_init(&empty, SHARED, 0);    //init as full
-    sem_init(&mutex, SHARED, 0);
+    sem_init(&mutex, SHARED, 1);
 
     pthread_create(&parentBird, &attr, Producer, NULL);
 
@@ -60,7 +62,7 @@ int main(int argc, char *argv[]) {
 void *Producer(void *arg){
     printf("parentBird created\n");
 
-    while(true){
+    while(TRUE){
         sem_wait(&empty);
         dish = nWorms;
         printf("The parent has returned with fresh worms.. %d worms are served\n", dish);      
@@ -73,14 +75,16 @@ void *Producer(void *arg){
 void *Consumer(void *arg){
     printf("babyBird created\n");
 
-    while(true){
+    while(TRUE){
         sem_wait(&mutex);
-        dish--;
-        printf("A worm has been eaten.. there are now %d worms left\n", dish);
+
         if(dish == 0){
             printf("The last worm has been eaten, and the babies are still hungry..\n");
             sem_post(&empty);
         } else { 
+            
+            dish--;
+            printf("A worm has been eaten by bird nr.%lu.. there are now %d worms left\n",pthread_self(), dish);
             sem_post(&mutex); 
         }
         sleep(1);
