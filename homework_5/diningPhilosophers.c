@@ -4,6 +4,13 @@
         mpicc -o dining diningPhilosophers.c
         mpiexec -np rank ./dining
 
+    Solution: 
+        Philosphers sends request for chopsticks to the table which 
+        handles all of the chopsticks. If the two chopsticks next to
+        the requesting philosopher are free in accordance to the table
+        then the philosopher "grabs" them and eats. otherwise it
+        will try again after sleeping. Table works as overseer/manager.
+
 */
 
 #include <stdio.h>
