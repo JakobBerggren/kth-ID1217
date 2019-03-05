@@ -71,7 +71,8 @@ void student(int rank){
 
     MPI_Recv(&partner, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-
+    MPI
+    
     printf("Student %d: My partner is %d\n", rank, partner);
 
 
