@@ -9,7 +9,7 @@
         handles all of the chopsticks. If the two chopsticks next to
         the requesting philosopher are free in accordance to the table
         then the philosopher "grabs" them and eats. otherwise it
-        will try again after sleeping. Table works as overseer/manager.
+        will try again after sleeping. Table works as supervisor/manager.
 
 */
 
