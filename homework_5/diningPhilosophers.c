@@ -97,6 +97,6 @@ void philosopher(int rank){
 
         } else{ printf("philosopher %d couldnt eat :(\n", rank); }
         //printf("philosopher %d is thinking\n", rank); 
-        sleep(rand() % 7);          //Thinking
+        sleep(rand() % 5);          //Thinking
     }
 }

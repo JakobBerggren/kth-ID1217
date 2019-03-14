@@ -36,6 +36,7 @@ int main(int argc, char *argv[]){
 
 
     MPI_Finalize();
+    return 0;
 }
 
 void teacher(int size){
@@ -70,8 +71,6 @@ void student(int rank){
     MPI_Send(&rank, 1,	MPI_INT, 0, 0, MPI_COMM_WORLD); 
 
     MPI_Recv(&partner, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-    MPI
     
     printf("Student %d: My partner is %d\n", rank, partner);
 
