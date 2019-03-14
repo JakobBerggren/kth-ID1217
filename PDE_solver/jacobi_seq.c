@@ -1,7 +1,9 @@
 /* A program to calculate jacobi matrices sequentially
+    @Author Jakob Berggren, Oskar Hahr
 
-
-@Author Jakob Berggren, Oskar Hahr
+    usage with gcc (version 4.2 or higher required):
+        gcc -o jacobi_seq jacobi_seq.c
+        ./jacobi_seq size iters workers
 
 */
 
@@ -24,7 +26,9 @@ __typeof__ (b) _b = (b); \
 _a > _b ? _a : _b; })
 
 int size, iters, workers;
+double start_time, end_time;
 
+FILE *output;
 
 /* timer */
 double read_timer() {
@@ -77,28 +81,29 @@ void jacobi(double** a, double** b){
 
 void print(double** a, double** b, double maxdiff){
     int i,j;
-
+    output = fopen("jacobi_seq.out","w");
     if(size < 203){
-        printf("Matrix A\n");
+        fprintf(output, "Matrix A\n");
         for(i = 0; i < size; i++){
             for(j = 0; j < size ; j++){
-                printf("%g, ",a[i][j]);
+                fprintf(output, "%g, ",a[i][j]);
             }
-            printf("\n");
+            fprintf(output, "\n");
         }
 
-        printf("\nMatrix B\n");
+        fprintf(output, "\nMatrix B\n");
         for(i = 0; i < size; i++){
             for(j = 0; j < size ; j++){
-                printf("%g, ",b[i][j]);
+                fprintf(output, "%g, ",b[i][j]);
             }
-            printf("\n");
+            fprintf(output, "\n");
         }     
     }
 
 
-    printf("Maxdiff is: %g", maxdiff);
+    fprintf(output, "Maxdiff is: %g", maxdiff);
 
+    fclose(output);
 
 }
 
@@ -142,10 +147,11 @@ int main(int argc, char const *argv[])
         }
     }
 
-
+    start_time = read_timer();
     jacobi(a, b);
-
     maxdiff = maxDiff(a,b);
+    end_time = read_timer();
+
 
     print(a, b,maxdiff);
 
