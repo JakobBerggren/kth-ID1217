@@ -156,5 +156,8 @@ int main(int argc, char const *argv[])
 
     print(a, b,maxdiff);
 
+    free(a);
+    free(b);
+
     return 0;
 }
