@@ -13,6 +13,7 @@ BENCHMARKS = benchmark-jacobi_seq benchmark-jacobi_parallel
 DEFINES = NONE
 
 all: $(TARGETS) $(BENCHMARKS) clean
+
 .PHONY: all
 
 #build
@@ -32,7 +33,7 @@ benchmark-jacobi_parallel:
 	@mkdir -p $(RESULT)
 	./$(BUILD)/jacobi_parallel 10 100 4 > $(RESULT)/$@-result.md
 
-
 #clean
 clean: 
 	rm -f *.o *.exe *.out $(TARGETS)
+

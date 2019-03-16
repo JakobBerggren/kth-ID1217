@@ -45,13 +45,19 @@ double read_timer() {
 double maxDiff(double** a, double** b){
     int i, j;
     double maxdiff;
+    double temp;
 
     maxdiff = 0.0;
     
     for(i = 0; i < size; i++)
     {
         for(j = 0; j < size; j++){
-            maxdiff = max(maxdiff, fabs(a[i][j] - b[i][j]));
+
+            temp = a[i][j] - b[i][j];
+            if(temp < 0)
+                temp = -temp;
+            if(temp > maxdiff)
+                maxdiff =temp;
         }
     }
     return maxdiff;
@@ -60,17 +66,17 @@ double maxDiff(double** a, double** b){
 void jacobi(double** a, double** b){
     int i, j, count;
     int interiorSize = size - 1;
-    for(count = 0; count < iters; count++)
+    for(count = 0; count < iters*0.5; count++)
     {
         for(i = 1; i < interiorSize; i++){
             for(j = 1; j < interiorSize; j++){
-                b[i][j] = (a[i-1][j] + a[i+1][j] + a[i][j-1] +a[i][j+1])*0.25;
+                b[i][j] = (a[i-1][j] + a[i+1][j] + a[i][j-1] +a[i][j+1]);
             }   
         }
 
         for(i = 1; i < interiorSize; i++){
             for(j = 1; j < interiorSize; j++){
-                a[i][j] = (b[i-1][j] + b[i+1][j] + b[i][j-1] +b[i][j+1])*0.25;
+                a[i][j] = (b[i-1][j] + b[i+1][j] + b[i][j-1] +b[i][j+1])*0.0625;
             }   
         }   
     }   

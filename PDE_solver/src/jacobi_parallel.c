@@ -34,20 +34,20 @@ double start_time, end_time;
 
 void maxDiff(double** a, double** b){
     int i, j;
-    double local_maxdiff;
+    double temp;
     
     #pragma omp for private(j)
     for(i = 1; i < size; i++)
     {
         for(j = 0; j < size; j++){
-            local_maxdiff = max(maxdiff, fabs(a[i][j] - b[i][j]));
-            if(local_maxdiff > maxdiff){
-                #pragma omp critical(maxdiff)
-                if(local_maxdiff > maxdiff){
-                    maxdiff = local_maxdiff;
-                }
-            }
-            
+            temp = a[i][j] - b[i][j];
+            if(temp < 0)
+                temp = -temp;
+            if(temp > maxdiff){
+                #pragma omp critical
+                if(temp > maxdiff)
+                    maxdiff =temp;
+            }            
         }
     }
 }
@@ -56,19 +56,19 @@ void jacobi(double** a, double** b){
     int i, j, count;
     int interiorSize = size - 1;
 
-    for(count = 0; count < iters; count++)
+    for(count = 0; count < iters*0.5; count++)
     {
         #pragma omp for private(j)
         for(i = 1; i < interiorSize; i++){
             for(j = 1; j < interiorSize; j++){
-                b[i][j] = (a[i-1][j] + a[i+1][j] + a[i][j-1] +a[i][j+1])*0.25;
+                b[i][j] = (a[i-1][j] + a[i+1][j] + a[i][j-1] +a[i][j+1]);
             }   
         }
                 //super sick implicit barrier
         #pragma omp for private(j)
         for(i = 1; i < interiorSize; i++){
             for(j = 1; j < interiorSize; j++){
-                a[i][j] = (b[i-1][j] + b[i+1][j] + b[i][j-1] +b[i][j+1])*0.25;
+                a[i][j] = (b[i-1][j] + b[i+1][j] + b[i][j-1] +b[i][j+1])*0.0625;
             }   
         }
                 //not so slick implicit barrier
