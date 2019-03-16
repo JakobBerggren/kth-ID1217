@@ -31,7 +31,6 @@ _a > _b ? _a : _b; })
 int size, iters, workers;
 double maxdiff;
 double start_time, end_time;
-FILE *output;
 
 void maxDiff(double** a, double** b){
     int i, j;
@@ -79,30 +78,24 @@ void jacobi(double** a, double** b){
 
 void print(double** a, double** b, double maxdiff){
     int i,j;
-    output = fopen("jacobi_parallel.out","w");
     if(size < 203){
-        fprintf(output, "Matrix A\n");
+        printf("Matrix A\n");
         for(i = 0; i < size; i++){
             for(j = 0; j < size ; j++){
-                fprintf(output, "%g, ",a[i][j]);
+                printf("%g, ",a[i][j]);
             }
-            fprintf(output, "\n");
+            printf("\n");
         }
 
-        fprintf(output, "\nMatrix B\n");
+        printf("\nMatrix B\n");
         for(i = 0; i < size; i++){
             for(j = 0; j < size ; j++){
-                fprintf(output, "%g, ",b[i][j]);
+                printf("%g, ",b[i][j]);
             }
-            fprintf(output, "\n");
+            printf("\n");
         }     
     }
-
-
-    fprintf(output, "Maxdiff is: %g", maxdiff);
-
-    fclose(output);
-
+    printf("Maxdiff is: %g", maxdiff);
 }
 
 
