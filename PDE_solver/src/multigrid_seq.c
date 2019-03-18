@@ -1,10 +1,8 @@
-/* A program to calculate jacobi matrices sequentially
+/* A program to calculate multigrid jacobi matrices sequentially
     @Author Jakob Berggren, Oskar Hahr
-
     usage with gcc (version 4.2 or higher required):
-        gcc -o jacobi_seq jacobi_seq.c
-        ./jacobi_seq size iters workers
-
+        gcc -o multigrid_seq multigrid_seq.c
+        ./multigrid_seq size iters workers
 */
 
 #include <stdlib.h>
@@ -17,16 +15,13 @@
 
 
 #define MAXSIZE 1000
-#define MAXITERS 100
+#define MAXITERS 100000000
 #define MAXWORKERS 1
 
-#define max(a,b) \
-({__typeof__ (a) _a = (a); \
-__typeof__ (b) _b = (b); \
-_a > _b ? _a : _b; })
 
 int size, iters, workers;
 double start_time, end_time;
+FILE* output;
 
 /* timer */
 double read_timer() {
@@ -42,77 +37,67 @@ double read_timer() {
     return (end.tv_sec - start.tv_sec) + 1.0e-6 * (end.tv_usec - start.tv_usec);
 }
 
-double maxDiff(double** a, double** b){
+double maxDiff(double** a, double** b, int interiorSize){
     int i, j;
     double maxdiff;
     double temp;
 
     maxdiff = 0.0;
     
-    for(i = 0; i < size; i++)
+    for(i = 1; i < interiorSize; i++)
     {
-        for(j = 0; j < size; j++){
+        for(j = 1; j < interiorSize; j++){
 
             temp = a[i][j] - b[i][j];
             if(temp < 0)
                 temp = -temp;
             if(temp > maxdiff)
-                maxdiff =temp;
+                maxdiff = temp;
         }
     }
     return maxdiff;
 }
 
-void jacobi(double** a, double** b){
-    int i, j, count;
-    int interiorSize = size - 1;
-    for(count = 0; count < iters*0.5; count++)
+void jacobi(double** a, double** b, int size, int it){
+    int i, j, count, interiorSize;
+    interiorSize =size - 1;
+    for(count = 0; count < it; count++)
     {
         for(i = 1; i < interiorSize; i++){
             for(j = 1; j < interiorSize; j++){
-                b[i][j] = (a[i-1][j] + a[i+1][j] + a[i][j-1] +a[i][j+1]);
+                b[i][j] = (a[i-1][j] + a[i+1][j] + a[i][j-1] +a[i][j+1])*0.25;
             }   
         }
 
-        for(i = 1; i < interiorSize; i++){
-            for(j = 1; j < interiorSize; j++){
-                a[i][j] = (b[i-1][j] + b[i+1][j] + b[i][j-1] +b[i][j+1])*0.0625;
+        for(i = 1; i < interiorSize - 1; i++){
+            for(j = 1; j < interiorSize - 1; j++){
+                a[i][j] = (b[i-1][j] + b[i+1][j] + b[i][j-1] +b[i][j+1])*0.25;
             }   
         }   
     }   
 }
 
 
-void print(double** a, double** b, double maxdiff){
+void print(double** a, int s){
     int i,j;
-    if(size < 203){
-        printf("Matrix A\n");
-        for(i = 0; i < size; i++){
-            for(j = 0; j < size ; j++){
-                printf("%g, ",a[i][j]);
-            }
-            printf("\n");
+    output = fopen("../result/multigrid_seq_matrix.txt","w");
+    for(i = 0; i < s; i++){
+        for(j = 0; j < s ; j++){
+            fprintf(output,"%g, ",a[i][j]);
         }
-
-        printf("\nMatrix B\n");
-        for(i = 0; i < size; i++){
-            for(j = 0; j < size ; j++){
-                printf("%g, ",b[i][j]);
-            }
-            printf("\n");
-        }     
+        fprintf(output,"\n");
     }
-    printf("Maxdiff is: %g", maxdiff);
+    fclose(output);
 }
 
 
-void restriction(double** fine, double** coarse, int sizec){        //TODO DECIDE WHICH SIDE X/Y AND I/J
-    int i, j, x, y;
-
-    for(i = 1; i < sizec; i++)
+void restriction(double** fine, double** coarse, int sizeCoarse){        
+    int i, j, x, y, interiorC;
+    interiorC = sizeCoarse - 1;
+    for(i = 1; i < interiorC; i++)
     {
         x = i << 1;
-        for(j = 1; j < sizec; j++)
+        for(j = 1; j < interiorC; j++)
         {
             y = j << 1;
             coarse[i][j] = fine[x][y]*0.5 + (fine[x-1][y] + fine[x][y-1] + fine[x][y + 1] + fine[x + 1][y]) * 0.125;
@@ -120,42 +105,40 @@ void restriction(double** fine, double** coarse, int sizec){        //TODO DECID
     }
 }
 
-void interpolation(double** coarse, double** fine, int sizef, int sizec){
-    int i, j, x, y;
-
-    for(i = 1; i < sizec; i++)
+void interpolation(double** coarse, double** fine, int sizeCoarse, int sizeFine){
+    int i, j, x, y, interiorC, interiorF;
+    interiorC = sizeCoarse -1;
+    interiorF = sizeFine - 1;
+    for(i = 1; i < interiorC; i++)
     {
         x = i << 1;
-        for(j = 1; j < sizec; j++)
+        for(j = 1; j < interiorC; j++)
         {
             y = j << 1;
             fine[x][y] = coarse[i][j]; 
         }
     }
 
-    for(i = 1; i < sizef; i += 2){
-        for(j = 2; j < sizef; j += 2){
+    for(i = 1; i < interiorF; i += 2){
+        for(j = 2; j < interiorF; j += 2){
             fine[i][j] = (fine[i-1][j] + fine[i+1][j]) * 0.5; 
         }
     }
 
-    for(i = 1; i < sizef; i++){
-        for(j = 1; j < sizef; j += 2){
+    for(i = 1; i < interiorF; i++){
+        for(j = 1; j < interiorF; j += 2){
             fine[i][j] = (fine[i][j-1] + fine[i][j+1]) * 0.5;
         }
     }
-        
-    
-
 
 }
 
 
-
 int main(int argc, char const *argv[])
 {
-    int i,j;
+    int i,j, size1, size2, size3, size4;
     double maxdiff;
+    double** a1, ** b1, ** a2, ** b2, ** a3, ** b3, ** a4, ** b4;
     size = (argc > 1)? atoi(argv[1]) : MAXSIZE;
     iters = (argc > 2)? atoi(argv[2]) : MAXITERS;
     workers = (argc > 3)? atoi(argv[3]) : MAXWORKERS;
@@ -163,40 +146,166 @@ int main(int argc, char const *argv[])
     if(iters > MAXITERS) iters = MAXITERS;
     if(workers > MAXWORKERS) workers = MAXWORKERS;
 
-    size += 2;      // makes room for boundary points :)  
 
 
-    double** a = malloc(size*sizeof(double*));
-    double** b = malloc(size*sizeof(double*));
-    for(i = 0; i < size; i++){
-        a[i] = malloc(size*sizeof(double));
-        b[i] = malloc(size*sizeof(double));
+    /* define the inner grid sizes of the four different grids in the V-cycle */
+    size1 = size;        
+    size2 = (size1 * 2) + 1;
+    size3 = (size2 * 2) + 1;
+    size4 = (size3 * 2) + 1;
+
+    /* The sizes of the interior points range from 1 : n, increment the input grid size by one to enable this */
+    size1 += 2;
+    size2 += 2;
+    size3 += 2;
+    size4 += 2;
+
+    /* Allocate & intitialize the matrices to represent the grids,
+    the grid sizes are incremented again to make room for boundary points on all 4 sides of the grids
+    */
+    //initMatrix(&a1, &b1, &a2, &b2, &a3,&b3, &a4, b4, size1 + 1, size2 + 1, size3 + 1, size4 + 1);
+
+    a1 = malloc(size1*sizeof(double*));
+    b1 = malloc(size1*sizeof(double*));
+
+    a2 = malloc(size2*sizeof(double*));
+    b2 = malloc(size2*sizeof(double*));
+
+    a3 = malloc(size3*sizeof(double*));
+    b3 = malloc(size3*sizeof(double*));
+
+    a4 = malloc(size4*sizeof(double*));
+    b4 = malloc(size4*sizeof(double*));
+
+    for(i = 0; i < size1; i++){
+        a1[i] = malloc(size1*sizeof(double));
+        b1[i] = malloc(size1*sizeof(double));
     }
 
-    /* init matrices */
-    for(i = 0; i < size; i++){
-        for( j = 0; j < size; j++)
+    for(i = 0; i < size2; i++){
+        a2[i] = malloc(size2*sizeof(double));
+        b2[i] = malloc(size2*sizeof(double));
+    }
+
+    for(i = 0; i < size3; i++){
+        a3[i] = malloc(size3*sizeof(double));
+        b3[i] = malloc(size3*sizeof(double));
+    }
+
+    for(i = 0; i < size4; i++){
+        a4[i] = malloc(size4*sizeof(double));
+        b4[i] = malloc(size4*sizeof(double));
+    }
+
+    /* initiate the values of the matrices for level 1 */
+    for(i = 0; i < size1; i++){
+        for( j = 0; j < size1; j++)
         {
             /* condition for init with boundary points */
-            if(i == 0 || j == 0 || i == size-1 || j == size-1){
-                a[i][j] = 1;    
-                b[i][j] = 1;
+            if(i == 0 || j == 0 || i == size1-1 || j == size1-1){
+                a1[i][j] = 1;    
+                b1[i][j] = 1;
             }
             /* interior points */
             else{
-                a[i][j] = 0;
-                b[i][j] = 0;
+                a1[i][j] = 0;
+                b1[i][j] = 0;
             }
         }
     }
+    /* initiate the values of the matrices for level 2 */
+    for(i = 0; i < size2; i++){
+        for( j = 0; j < size2; j++)
+        {
+            /* condition for init with boundary points */
+            if(i == 0 || j == 0 || i == size2-1 || j == size2-1){
+                a2[i][j] = 1;    
+                b2[i][j] = 1;
+            }
+            /* interior points */
+            else{
+                a2[i][j] = 0;
+                b2[i][j] = 0;
+            }
+        }
+    }
+    /* initiate the values of the matrices for level 3 */
+    for(i = 0; i < size3; i++){
+        for( j = 0; j < size3; j++)
+        {
+            /* condition for init with boundary points */
+            if(i == 0 || j == 0 || i == size3-1 || j == size3-1){
+                a3[i][j] = 1;    
+                b3[i][j] = 1;
+            }
+            /* interior points */
+            else{
+                a3[i][j] = 0;
+                b3[i][j] = 0;
+            }
+        }
+    }
+    /* initiate the values of the matrices for level 4 */
+    for(i = 0; i < size4; i++){
+        for( j = 0; j < size4; j++)
+        {
+            /* condition for init with boundary points */
+            if(i == 0 || j == 0 || i == size4-1 || j == size4-1){
+                a4[i][j] = 1;    
+                b4[i][j] = 1;
+            }
+            /* interior points */
+            else{
+                a4[i][j] = 0;
+                b4[i][j] = 0;
+            }
+        }
+    }   
 
+    /* start_time is recorded as the V-cycle starts */
     start_time = read_timer();
-    jacobi(a, b);
-    maxdiff = maxDiff(a,b);
+
+    /* Perform four jacobi iterations on the 4th level (finest) & restrict to coarser grain*/
+    jacobi(a4, b4, size4, 4);
+    restriction(a4, a3, size3);
+
+    /* Perform four jacobi iterations on the 3rd level & restrict to coarser grain*/
+    jacobi(a3, b3, size3, 4);
+    restriction(a3, a2, size2);
+
+    /* Perform four jacobi iterations on the 2nd level & restrict to coarser grain*/
+    jacobi(a2, b2, size2, 4);
+    restriction(a2, a1, size1);
+
+    /* Perform the input number of jacobi iterations on coarsest level & interpolate to finer grain */
+    jacobi(a1, b1, size1, iters);
+    interpolation(a1, a2, size1, size2);
+
+    /* Perform four jacobi iterations on the 2nd level level & interpolate to finer grain */
+    jacobi(a2, b2, size2, 4);
+    interpolation(a2, a3, size2, size3);
+
+    /* Perform four jacobi iterations on the 3rd level level & interpolate to finer grain */
+    jacobi(a3, b3, size3, 4);
+    interpolation(a3, a4, size3, size4);
+
+    /* perform the last four jacobi iterations on the finest grained level and take the maxdiff */
+    jacobi(a4, b4, size4, 4);
+    maxdiff = maxDiff(a4, b4, size4);
     end_time = read_timer();
 
-
-    print(a, b,maxdiff);
-
+    //print(a4, size4);
+    printf("Size: %d, Iterations: %d, Number of Workers: %d,\t", size-2, iters, workers);
+    printf("Runtime was: %gs,\t", end_time - start_time);
+    printf("Maximum error: %g\n", maxdiff);
+    
+    free(a1);
+    free(a2);
+    free(a3);
+    free(a4);
+    free(b1);
+    free(b2);
+    free(b3);
+    free(b4);
     return 0;
 }

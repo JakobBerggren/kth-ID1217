@@ -1,6 +1,11 @@
-Fix Print to file
 
 Add timer to jacobi_seq
 
 Add performance print
+
+Fix commenting
+
+check order of x, y in regards to i, j
+
+benchmark scheduling of for loops
 

@@ -17,7 +17,7 @@
 
 
 #define MAXSIZE 1000
-#define MAXITERS 100
+#define MAXITERS 1000000
 #define MAXWORKERS 1
 
 #define max(a,b) \
@@ -27,6 +27,7 @@ _a > _b ? _a : _b; })
 
 int size, iters, workers;
 double start_time, end_time;
+FILE* output;
 
 /* timer */
 double read_timer() {
@@ -70,39 +71,29 @@ void jacobi(double** a, double** b){
     {
         for(i = 1; i < interiorSize; i++){
             for(j = 1; j < interiorSize; j++){
-                b[i][j] = (a[i-1][j] + a[i+1][j] + a[i][j-1] +a[i][j+1]);
+                b[i][j] = (a[i-1][j] + a[i+1][j] + a[i][j-1] +a[i][j+1]) *0.25;
             }   
         }
 
         for(i = 1; i < interiorSize; i++){
             for(j = 1; j < interiorSize; j++){
-                a[i][j] = (b[i-1][j] + b[i+1][j] + b[i][j-1] +b[i][j+1])*0.0625;
+                a[i][j] = (b[i-1][j] + b[i+1][j] + b[i][j-1] +b[i][j+1]) * 0.25;
             }   
         }   
     }   
 }
 
 
-void print(double** a, double** b, double maxdiff){
+void print(double** a){
     int i,j;
-    if(size < 203){
-        printf("Matrix A\n");
-        for(i = 0; i < size; i++){
-            for(j = 0; j < size ; j++){
-                printf("%g, ",a[i][j]);
-            }
-            printf("\n");
+    output = fopen("./result/jacobi_seq_matrix.txt","w");
+    for(i = 0; i < size; i++){
+        for(j = 0; j < size ; j++){
+            fprintf(output,"%g, ",a[i][j]);
         }
-
-        printf("\nMatrix B\n");
-        for(i = 0; i < size; i++){
-            for(j = 0; j < size ; j++){
-                printf("%g, ",b[i][j]);
-            }
-            printf("\n");
-        }     
+        fprintf(output,"\n");
     }
-    printf("Maxdiff is: %g", maxdiff);
+    fclose(output);
 }
 
 
@@ -150,8 +141,12 @@ int main(int argc, char const *argv[])
     maxdiff = maxDiff(a,b);
     end_time = read_timer();
 
+    //print(a);
+    printf("Size: %d, Iterations: %d, Number of Workers: %d,\t", size-2, iters, workers);
+    printf("Runtime was: %gs,\t", end_time - start_time);
+    printf("Maximum error: %g\n", maxdiff);
 
-    print(a, b,maxdiff);
-
+    free(a);
+    free(b);
     return 0;
 }

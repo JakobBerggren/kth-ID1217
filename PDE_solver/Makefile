@@ -6,9 +6,9 @@ SOURCE = src
 BUILD = build
 RESULT = result
 
-TARGETS = jacobi_seq jacobi_parallel
+TARGETS = jacobi_seq jacobi_parallel multigrid_seq multigrid_parallel
 
-BENCHMARKS = benchmark-jacobi_seq benchmark-jacobi_parallel
+BENCHMARKS = benchmark-multigrid_parallel
 
 DEFINES = NONE
 
@@ -25,15 +25,109 @@ jacobi_parallel: $(SOURCE)/jacobi_parallel.c
 	@mkdir -p $(BUILD)
 	$(CC) $(CFLAGS) -o $(BUILD)/$@ $(SOURCE)/$@.c $(LIBS)
 
+multigrid_seq: $(SOURCE)/multigrid_seq.c
+	@mkdir -p $(BUILD)
+	$(CC) $(CFLAGS) -o $(BUILD)/$@ $(SOURCE)/$@.c $(LIBS)
+
+multigrid_parallel: $(SOURCE)/multigrid_parallel.c
+	@mkdir -p $(BUILD)
+	$(CC) $(CFLAGS) -o $(BUILD)/$@ $(SOURCE)/$@.c $(LIBS)
+
 #run
 benchmark-jacobi_seq:
 	@mkdir -p $(RESULT)
-	./$(BUILD)/jacobi_seq 10 100 4 > $(RESULT)/$@-result.md
+	@rm $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_seq 100 1000000 1 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_seq 100 1000000 1 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_seq 100 1000000 1 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_seq 100 1000000 1 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_seq 100 1000000 1 >> $(RESULT)/$@-result.md
+
+	./$(BUILD)/jacobi_seq 200 200000 1 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_seq 200 200000 1 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_seq 200 200000 1 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_seq 200 200000 1 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_seq 200 200000 1 >> $(RESULT)/$@-result.md
+	
 benchmark-jacobi_parallel:
 	@mkdir -p $(RESULT)
-	./$(BUILD)/jacobi_parallel 10 100 4 > $(RESULT)/$@-result.md
+	@rm $(RESULT)/$@-result.md
+	export OMP_WAIT_POLICY=ACTIVE
+	./$(BUILD)/jacobi_parallel 100 1000000 1 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_parallel 100 1000000 1 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_parallel 100 1000000 1 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_parallel 100 1000000 1 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_parallel 100 1000000 1 >> $(RESULT)/$@-result.md
+
+	./$(BUILD)/jacobi_parallel 100 1000000 2 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_parallel 100 1000000 2 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_parallel 100 1000000 2 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_parallel 100 1000000 2 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_parallel 100 1000000 2 >> $(RESULT)/$@-result.md
+
+	./$(BUILD)/jacobi_parallel 100 1000000 3 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_parallel 100 1000000 3 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_parallel 100 1000000 3 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_parallel 100 1000000 3 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_parallel 100 1000000 3 >> $(RESULT)/$@-result.md
+
+	./$(BUILD)/jacobi_parallel 100 1000000 4 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_parallel 100 1000000 4 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_parallel 100 1000000 4 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_parallel 100 1000000 4 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_parallel 100 1000000 4 >> $(RESULT)/$@-result.md
+	
+	./$(BUILD)/jacobi_parallel 200 200000 1 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_parallel 200 200000 1 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_parallel 200 200000 1 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_parallel 200 200000 1 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_parallel 200 200000 1 >> $(RESULT)/$@-result.md
+
+	./$(BUILD)/jacobi_parallel 200 200000 2 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_parallel 200 200000 2 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_parallel 200 200000 2 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_parallel 200 200000 2 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_parallel 200 200000 2 >> $(RESULT)/$@-result.md
+	
+	./$(BUILD)/jacobi_parallel 200 200000 3 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_parallel 200 200000 3 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_parallel 200 200000 3 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_parallel 200 200000 3 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_parallel 200 200000 3 >> $(RESULT)/$@-result.md
+
+	./$(BUILD)/jacobi_parallel 200 200000 4 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_parallel 200 200000 4 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_parallel 200 200000 4 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_parallel 200 200000 4 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_parallel 200 200000 4 >> $(RESULT)/$@-result.md
+
+benchmark-multigrid_seq:
+	@mkdir -p $(RESULT)
+	@rm $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_seq 12 20000000 1 >> $(RESULT)/$@-result.md
+
+	./$(BUILD)/multigrid_seq 24 4000000 1 >> $(RESULT)/$@-result.md
+
+benchmark-multigrid_parallel:
+	@mkdir -p $(RESULT)
+	@rm $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 12 20000000 1 >> $(RESULT)/$@-result.md
+
+	./$(BUILD)/multigrid_parallel 12 20000000 2 >> $(RESULT)/$@-result.md
+
+	./$(BUILD)/multigrid_parallel 12 20000000 3 >> $(RESULT)/$@-result.md
+
+	./$(BUILD)/multigrid_parallel 12 20000000 4 >> $(RESULT)/$@-result.md
+
+	./$(BUILD)/multigrid_parallel 24 4000000 1 >> $(RESULT)/$@-result.md
+
+	./$(BUILD)/multigrid_parallel 24 4000000 2 >> $(RESULT)/$@-result.md
+
+	./$(BUILD)/multigrid_parallel 24 4000000 3 >> $(RESULT)/$@-result.md
+
+	./$(BUILD)/multigrid_parallel 24 4000000 4 >> $(RESULT)/$@-result.md
+
 
 #clean
 clean: 
 	rm -f *.o *.exe *.out $(TARGETS)
-
