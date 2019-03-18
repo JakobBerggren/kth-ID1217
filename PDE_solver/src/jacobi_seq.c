@@ -3,7 +3,7 @@
 
     usage with gcc (version 4.2 or higher required):
         gcc -o jacobi_seq jacobi_seq.c
-        ./jacobi_seq size iters workers
+        ./jacobi_seq size iters
 
 */
 
@@ -15,15 +15,10 @@
 #include <math.h>
 #include <limits.h>
 
-
+/* MAX for: number for grid size and number of iterations */
 #define MAXSIZE 1000
 #define MAXITERS 1000000
-#define MAXWORKERS 1
 
-#define max(a,b) \
-({__typeof__ (a) _a = (a); \
-__typeof__ (b) _b = (b); \
-_a > _b ? _a : _b; })
 
 int size, iters, workers;
 double start_time, end_time;
@@ -42,7 +37,7 @@ double read_timer() {
     gettimeofday( &end, NULL );
     return (end.tv_sec - start.tv_sec) + 1.0e-6 * (end.tv_usec - start.tv_usec);
 }
-
+/* Function for calculating the max difference error between grids a & b */
 double maxDiff(double** a, double** b){
     int i, j;
     double maxdiff;
@@ -64,10 +59,14 @@ double maxDiff(double** a, double** b){
     return maxdiff;
 }
 
+
+/* An iterative Jacobi Method function that iterates over the grids a & b updating their values
+over a number of iterations specified as input data. 
+*/
 void jacobi(double** a, double** b){
     int i, j, count;
     int interiorSize = size - 1;
-    for(count = 0; count < iters*0.5; count++)
+    for(count = 0; count < iters; count++)
     {
         for(i = 1; i < interiorSize; i++){
             for(j = 1; j < interiorSize; j++){
@@ -83,7 +82,7 @@ void jacobi(double** a, double** b){
     }   
 }
 
-
+/* Function for printing the results of a grid to the output file */
 void print(double** a){
     int i,j;
     output = fopen("./result/jacobi_seq_matrix.txt","w");
@@ -97,21 +96,24 @@ void print(double** a){
 }
 
 
-
 int main(int argc, char const *argv[])
 {
     int i,j;
     double maxdiff;
+
+    /* initialize input values*/
     size = (argc > 1)? atoi(argv[1]) : MAXSIZE;
     iters = (argc > 2)? atoi(argv[2]) : MAXITERS;
-    workers = (argc > 3)? atoi(argv[3]) : MAXWORKERS;
     if(size > MAXSIZE) size = MAXSIZE; 
     if(iters > MAXITERS) iters = MAXITERS;
-    if(workers > MAXWORKERS) workers = MAXWORKERS;
-
-    size += 2;      // makes room for boundary points :)  
 
 
+    /* The specified input variable size is defined as the size of the interior grid,
+    add 2 to this size to retrieve the total size of the grid including outer boundary points 
+    */
+    size += 2;      
+
+    /* Allocate memory for the grids */
     double** a = malloc(size*sizeof(double*));
     double** b = malloc(size*sizeof(double*));
     for(i = 0; i < size; i++){
@@ -123,28 +125,33 @@ int main(int argc, char const *argv[])
     for(i = 0; i < size; i++){
         for( j = 0; j < size; j++)
         {
-            /* condition for init with boundary points */
+            /* condition for init with boundary points 
+            outer boundary points are = 1 
+            */
             if(i == 0 || j == 0 || i == size-1 || j == size-1){
                 a[i][j] = 1;    
                 b[i][j] = 1;
             }
-            /* interior points */
+            /* interior points are = 0 */
             else{
                 a[i][j] = 0;
                 b[i][j] = 0;
             }
         }
     }
-
+    /* Beginning of computational part, read start time */
     start_time = read_timer();
+    /* Jacobi iteration between a & b*/
     jacobi(a, b);
+    /* Calculate max difference error between a & b*/
     maxdiff = maxDiff(a,b);
+    /* End of computational part, read the end time */
     end_time = read_timer();
 
-    //print(a);
-    printf("Size: %d, Iterations: %d, Number of Workers: %d,\t", size-2, iters, workers);
-    printf("Runtime was: %gs,\t", end_time - start_time);
-    printf("Maximum error: %g\n", maxdiff);
+    print(a);
+    printf("%d %d\t", size-2, iters);
+    printf("%g\t", end_time - start_time);
+    printf("%g\n", maxdiff);
 
     free(a);
     free(b);

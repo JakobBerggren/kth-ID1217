@@ -1,7 +1,7 @@
 /* A program to calculate jacobi matrices in parallel using openmp
     @Author Jakob Berggren, Oskar Hahr
 
-    usage with gcc (version 4.2 or higher required):
+    usage with gcc (version 4.2 or higher required) and :
         gcc -O -fopenmp -o jacobi_parallel jacobi_parallel.c
         ./jacobi_parallel size iters workers
 
@@ -16,26 +16,23 @@
 #include <limits.h>
 #include <omp.h>
 
+/* MAX for: Grid size, Number of Iterations and Working threads */
 
 #define MAXSIZE 1000
 #define MAXITERS 1000000
-#define MAXWORKERS 10
-
-#define max(a,b) \
-({__typeof__ (a) _a = (a); \
-__typeof__ (b) _b = (b); \
-_a > _b ? _a : _b; })
+#define MAXWORKERS 4
 
 int size, iters, workers;
 double maxdiff;
 double start_time, end_time;
 FILE* output;
 
+/* Iterative parallel function for calculating the max difference error between grids a & b */
 void maxDiff(double** a, double** b){
     int i, j;
     double temp;
     
-    #pragma omp for private(j, temp)
+    #pragma omp parallel for private(j, temp)
     for(i = 1; i < size; i++)
     {
         for(j = 1; j < size; j++){
@@ -51,29 +48,37 @@ void maxDiff(double** a, double** b){
     }
 }
 
+/* Parallelized Jacobi Method function that iterates over the grids a & b updating their values
+over a number of iterations. 
+*/
 void jacobi(double** a, double** b){
     int i, j, count;
     int interiorSize = size - 1;
 
-    for(count = 0; count < iters*0.5; count++)
+    for(count = 0; count < iters; count++)
     {
-        #pragma omp for private(j)
-        for(i = 1; i < interiorSize; i++){
-            for(j = 1; j < interiorSize; j++){
-                b[i][j] = (a[i-1][j] + a[i+1][j] + a[i][j-1] +a[i][j+1])* 0.25;
-            }   
-        }
-        
-        #pragma omp for private(j)
-        for(i = 1; i < interiorSize; i++){
-            for(j = 1; j < interiorSize; j++){
-                a[i][j] = (b[i-1][j] + b[i+1][j] + b[i][j-1] +b[i][j+1])*0.25;
-            }   
+        /* launch threads */
+        #pragma omp parallel
+        {
+            /* Update all the values in grid b */
+            #pragma omp for private(j)
+            for(i = 1; i < interiorSize; i++){
+                for(j = 1; j < interiorSize; j++){
+                    b[i][j] = (a[i-1][j] + a[i+1][j] + a[i][j-1] +a[i][j+1])* 0.25;
+                }   
+            }
+            /* Update all the values in grid a*/
+            #pragma omp for private(j)
+            for(i = 1; i < interiorSize; i++){
+                for(j = 1; j < interiorSize; j++){
+                    a[i][j] = (b[i-1][j] + b[i+1][j] + b[i][j-1] +b[i][j+1])*0.25;
+                }   
+            }
         }
     }   
 }
 
-
+/* Function for printing the results of a grid to the output file */
 void print(double** a){
     int i,j;
     output = fopen("./result/jacobi_parallel_matrix.txt","w");
@@ -92,6 +97,8 @@ int main(int argc, char const *argv[])
 {
     int i,j;
     maxdiff = 0.0;
+
+    /* initialize input variables */
     size = (argc > 1)? atoi(argv[1]) : MAXSIZE;
     iters = (argc > 2)? atoi(argv[2]) : MAXITERS;
     workers = (argc > 3)? atoi(argv[3]) : MAXWORKERS;
@@ -99,9 +106,15 @@ int main(int argc, char const *argv[])
     if(iters > MAXITERS) iters = MAXITERS;
     if(workers > MAXWORKERS) workers = MAXWORKERS;
 
-    size += 2;      // makes room for boundary points :)  
+   
+    /* set number of workers */
     omp_set_num_threads(workers);
 
+    /* The specified input variable: Size, is defined as the size of the interior grid.
+    By adding 2 to this size the total size of the grid is retrieve, including outer boundary points 
+    */
+    size += 2;   
+    
     double** a = malloc(size*sizeof(double*));
     double** b = malloc(size*sizeof(double*));
     for(i = 0; i < size; i++){
@@ -113,31 +126,36 @@ int main(int argc, char const *argv[])
     for(i = 0; i < size; i++){
         for( j = 0; j < size; j++)
         {
-            /* condition for init with boundary points */
+            /* condition for init with boundary points 
+            outer boundary points are = 1 */
             if(i == 0 || j == 0 || i == size-1 || j == size-1){
                 a[i][j] = 1;    
                 b[i][j] = 1;
             }
-            /* interior points */
+            /* interior points are = 0 */
             else{
                 a[i][j] = 0;
                 b[i][j] = 0;
             }
         }
     }
+    /* Beginning of computational part, read start time */
     start_time = omp_get_wtime();
-    #pragma omp parallel
-    {
-            jacobi(a, b);
-            maxDiff(a,b);
-    }
+
+
+    /* Jacobi iteration between a & b*/
+    jacobi(a, b);
+    /* Calculate max difference error between a & b*/
+    maxDiff(a,b);
+
+    /* End of computational part, read the end time */
     end_time = omp_get_wtime();
 
 
-    //print(a);
-    printf("Size: %d, Iterations: %d, Number of Workers: %d,\t", size-2, iters, workers);
-    printf("Runtime was: %gs,\t", end_time - start_time);
-    printf("Maximum error: %g\n", maxdiff);
+    print(a);
+    printf("%d %d %d\t", size-2, iters, workers);
+    printf("%g\t", end_time - start_time);
+    printf("%g\n", maxdiff);
     free(a);
     free(b);
 

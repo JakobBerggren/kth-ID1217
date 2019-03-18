@@ -104,20 +104,20 @@ benchmark-jacobi_parallel:
 benchmark-multigrid_seq:
 	@mkdir -p $(RESULT)
 	@rm $(RESULT)/$@-result.md
-	./$(BUILD)/multigrid_seq 12 20000000 1 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_seq 12 1000000 1 >> $(RESULT)/$@-result.md
 
-	./$(BUILD)/multigrid_seq 24 4000000 1 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_seq 24 400000 1 >> $(RESULT)/$@-result.md
 
 benchmark-multigrid_parallel:
 	@mkdir -p $(RESULT)
 	@rm $(RESULT)/$@-result.md
-	./$(BUILD)/multigrid_parallel 12 20000000 1 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 12 1000000 1 >> $(RESULT)/$@-result.md
 
-	./$(BUILD)/multigrid_parallel 12 20000000 2 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 12 1000000 2 >> $(RESULT)/$@-result.md
 
-	./$(BUILD)/multigrid_parallel 12 20000000 3 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 12 1000000 3 >> $(RESULT)/$@-result.md
 
-	./$(BUILD)/multigrid_parallel 12 20000000 4 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 12 1000000 4 >> $(RESULT)/$@-result.md
 
 	./$(BUILD)/multigrid_parallel 24 4000000 1 >> $(RESULT)/$@-result.md
 
