@@ -8,7 +8,7 @@ RESULT = result
 
 TARGETS = jacobi_seq jacobi_parallel multigrid_seq multigrid_parallel
 
-BENCHMARKS = benchmark-multigrid_parallel
+BENCHMARKS = benchmark-multigrid_seq
 
 DEFINES = NONE
 
@@ -36,23 +36,22 @@ multigrid_parallel: $(SOURCE)/multigrid_parallel.c
 #run
 benchmark-jacobi_seq:
 	@mkdir -p $(RESULT)
-	@rm $(RESULT)/$@-result.md
-	./$(BUILD)/jacobi_seq 100 1000000 1 >> $(RESULT)/$@-result.md
-	./$(BUILD)/jacobi_seq 100 1000000 1 >> $(RESULT)/$@-result.md
-	./$(BUILD)/jacobi_seq 100 1000000 1 >> $(RESULT)/$@-result.md
-	./$(BUILD)/jacobi_seq 100 1000000 1 >> $(RESULT)/$@-result.md
-	./$(BUILD)/jacobi_seq 100 1000000 1 >> $(RESULT)/$@-result.md
+	@rm -f $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_seq 100 1000000 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_seq 100 1000000 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_seq 100 1000000 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_seq 100 1000000 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_seq 100 1000000 >> $(RESULT)/$@-result.md
 
-	./$(BUILD)/jacobi_seq 200 200000 1 >> $(RESULT)/$@-result.md
-	./$(BUILD)/jacobi_seq 200 200000 1 >> $(RESULT)/$@-result.md
-	./$(BUILD)/jacobi_seq 200 200000 1 >> $(RESULT)/$@-result.md
-	./$(BUILD)/jacobi_seq 200 200000 1 >> $(RESULT)/$@-result.md
-	./$(BUILD)/jacobi_seq 200 200000 1 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_seq 200 200000 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_seq 200 200000 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_seq 200 200000 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_seq 200 200000 >> $(RESULT)/$@-result.md
+	./$(BUILD)/jacobi_seq 200 200000 >> $(RESULT)/$@-result.md
 	
 benchmark-jacobi_parallel:
 	@mkdir -p $(RESULT)
-	@rm $(RESULT)/$@-result.md
-	export OMP_WAIT_POLICY=ACTIVE
+	@rm -f $(RESULT)/$@-result.md
 	./$(BUILD)/jacobi_parallel 100 1000000 1 >> $(RESULT)/$@-result.md
 	./$(BUILD)/jacobi_parallel 100 1000000 1 >> $(RESULT)/$@-result.md
 	./$(BUILD)/jacobi_parallel 100 1000000 1 >> $(RESULT)/$@-result.md
@@ -103,29 +102,72 @@ benchmark-jacobi_parallel:
 
 benchmark-multigrid_seq:
 	@mkdir -p $(RESULT)
-	@rm $(RESULT)/$@-result.md
-	./$(BUILD)/multigrid_seq 12 1000000 1 >> $(RESULT)/$@-result.md
+	@rm -f $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_seq 12 10000000 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_seq 12 10000000 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_seq 12 10000000 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_seq 12 10000000 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_seq 12 10000000 >> $(RESULT)/$@-result.md
 
-	./$(BUILD)/multigrid_seq 24 400000 1 >> $(RESULT)/$@-result.md
+
+
+	./$(BUILD)/multigrid_seq 24 4000000 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_seq 24 4000000 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_seq 24 4000000 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_seq 24 4000000 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_seq 24 4000000 >> $(RESULT)/$@-result.md
+	
 
 benchmark-multigrid_parallel:
 	@mkdir -p $(RESULT)
-	@rm $(RESULT)/$@-result.md
-	./$(BUILD)/multigrid_parallel 12 1000000 1 >> $(RESULT)/$@-result.md
+	@rm -f $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 12 10000000 1 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 12 10000000 1 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 12 10000000 1 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 12 10000000 1 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 12 10000000 1 >> $(RESULT)/$@-result.md
 
-	./$(BUILD)/multigrid_parallel 12 1000000 2 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 12 10000000 2 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 12 10000000 2 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 12 10000000 2 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 12 10000000 2 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 12 10000000 2 >> $(RESULT)/$@-result.md
 
-	./$(BUILD)/multigrid_parallel 12 1000000 3 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 12 10000000 3 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 12 10000000 3 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 12 10000000 3 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 12 10000000 3 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 12 10000000 3 >> $(RESULT)/$@-result.md
 
-	./$(BUILD)/multigrid_parallel 12 1000000 4 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 12 10000000 4 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 12 10000000 4 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 12 10000000 4 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 12 10000000 4 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 12 10000000 4 >> $(RESULT)/$@-result.md
 
-	./$(BUILD)/multigrid_parallel 24 4000000 1 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 24 40000000 1 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 24 40000000 1 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 24 40000000 1 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 24 40000000 1 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 24 40000000 1 >> $(RESULT)/$@-result.md
 
-	./$(BUILD)/multigrid_parallel 24 4000000 2 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 24 40000000 2 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 24 40000000 2 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 24 40000000 2 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 24 40000000 2 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 24 40000000 2 >> $(RESULT)/$@-result.md
 
-	./$(BUILD)/multigrid_parallel 24 4000000 3 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 24 40000000 3 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 24 40000000 3 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 24 40000000 3 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 24 40000000 3 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 24 40000000 3 >> $(RESULT)/$@-result.md
 
-	./$(BUILD)/multigrid_parallel 24 4000000 4 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 24 40000000 4 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 24 40000000 4 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 24 40000000 4 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 24 40000000 4 >> $(RESULT)/$@-result.md
+	./$(BUILD)/multigrid_parallel 24 40000000 4 >> $(RESULT)/$@-result.md
 
 
 #clean

@@ -82,7 +82,7 @@ void jacobi(double** a, double** b, int size, int iterations){
 
 void print(double** a, int s){
     int i,j;
-    output = fopen("../result/multigrid_parallel_matrix.txt","w");
+    output = fopen("multigrid_parallel_matrix.txt","w");
 
     for(i = 0; i < s; i++){
         for(j = 0; j < s; j++){
@@ -316,9 +316,20 @@ int main(int argc, char const *argv[])
     end_time = omp_get_wtime();
 
 
-    //print(a4, size4);
+    print(a4, size4);
     printf("%d %d %d\t", size1-2, iters, workers);
     printf("%g\t", end_time - start_time);
     printf("%g\n", maxdiff);
+
+    free(a1);
+    free(a2);
+    free(a3);
+    free(a4);
+    free(b1);
+    free(b2);
+    free(b3);
+    free(b4);
+
+
     return 0;
 }

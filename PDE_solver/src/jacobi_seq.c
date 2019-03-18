@@ -85,7 +85,7 @@ void jacobi(double** a, double** b){
 /* Function for printing the results of a grid to the output file */
 void print(double** a){
     int i,j;
-    output = fopen("./result/jacobi_seq_matrix.txt","w");
+    output = fopen("jacobi_seq_matrix.txt","w");
     for(i = 0; i < size; i++){
         for(j = 0; j < size ; j++){
             fprintf(output,"%g, ",a[i][j]);
